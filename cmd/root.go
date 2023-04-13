@@ -27,20 +27,17 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "hash1",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "A tool to calculate the hash checksum of one local file",
+	Long: `hash1 calculates the hash checksum of one local file
+and then prints it (hash1 print) or compares it with
+the expected value (hash1 verify).`,
+	Version: "0.1.0",
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute adds all child commands to the root command
+// and sets flags appropriately.
+// This is called by main.main().
+// It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -49,13 +46,13 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	// Prepend a short copyright notice to the default help template.
+	rootCmd.SetHelpTemplate(`hash1  Copyright (C) 2023  Yuan Gao
+This program comes with ABSOLUTELY NO WARRANTY; for details type "hash1 show w".
+This is free software, and you are welcome to redistribute it
+under certain conditions; type "hash1 show c" for details.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.hash1.yaml)")
+{{with (or .Long .Short)}}{{. | trimTrailingWhitespaces}}
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+{{end}}{{if or .Runnable .HasSubCommands}}{{.UsageString}}{{end}}`)
 }

@@ -21,34 +21,33 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/donyori/gogo/copyright/agpl3"
 	"github.com/spf13/cobra"
 )
 
 // showCmd represents the show command
 var showCmd = &cobra.Command{
-	Use:   "show",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "show [flags] [w|warranty|c|conditions]",
+	Short: "Print the disclaimer of warranty or the terms and conditions of the license",
+	Long: `Show (hash1 show) prints the disclaimer of warranty or the terms and conditions
+of the GNU Affero General Public License.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+    "hash1 show w" or "hash1 show warranty" prints the disclaimer of warranty.
+    "hash1 show c" or "hash1 show conditions" prints the terms and conditions.`,
+	ValidArgs: []string{"w", "c", "warranty", "conditions"},
+	Args:      cobra.MatchAll(cobra.MaximumNArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("show called")
+		if len(args) == 0 {
+			err := cmd.Help()
+			cobra.CheckErr(err)
+		} else if args[0] == "w" || args[0] == "warranty" {
+			fmt.Println(agpl3.DisclaimerOfWarranty)
+		} else {
+			fmt.Println(agpl3.TermsAndConditions)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(showCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// showCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
