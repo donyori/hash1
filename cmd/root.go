@@ -51,6 +51,7 @@ func init() {
 This program comes with ABSOLUTELY NO WARRANTY; for details type "hash1 show w".
 This is free software, and you are welcome to redistribute it
 under certain conditions; type "hash1 show c" for details.
+Program source: <https://github.com/donyori/hash1>.
 
 {{with (or .Long .Short)}}{{. | trimTrailingWhitespaces}}
 
