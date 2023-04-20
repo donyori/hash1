@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// showCmd represents the show command
+// showCmd represents the show command.
 var showCmd = &cobra.Command{
 	Use:   "show [flags] [w|warranty|c|conditions]",
 	Short: "Print the disclaimer of warranty or the terms and conditions of the license",
@@ -38,8 +38,7 @@ of the GNU Affero General Public License.
 	Args:      cobra.MatchAll(cobra.MaximumNArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			err := cmd.Help()
-			cobra.CheckErr(err)
+			cobra.CheckErr(cmd.Help())
 		} else if args[0] == "w" || args[0] == "warranty" {
 			fmt.Println(agpl3.DisclaimerOfWarranty)
 		} else {

@@ -40,7 +40,7 @@ import (
 //
 // Each item (of type []string) starts with the hash algorithm name,
 // followed by its aliases.
-var Names = [][]string{
+var Names = [...][]string{
 	{"md4"},
 	{"md5", "m"},
 	{"sha-1", "sha_1", "sha1"},
@@ -72,7 +72,7 @@ var Names = [][]string{
 // Hashes are the supported hash algorithms.
 //
 // All its items are available (i.e., have been linked to the binary).
-var Hashes = []crypto.Hash{
+var Hashes = [...]crypto.Hash{
 	crypto.MD4,
 	crypto.MD5,
 	crypto.SHA1,
@@ -181,8 +181,7 @@ func CalculateChecksum(filename string, upper bool, hashNames []string) (
 	cs, err := local.Checksum(filename, upper, newHashes...)
 	if err != nil {
 		return nil, errors.AutoWrap(err)
-	}
-	if len(cs) > 0 {
+	} else if len(cs) > 0 {
 		checksums = make([]HashChecksum, n)
 		for i := 0; i < n; i++ {
 			checksums[i].HashName = hs[i].String()

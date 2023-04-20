@@ -53,7 +53,7 @@ func TestNamesAndHashesConsistent(t *testing.T) {
 	}
 
 	n := len(hashcs.Names)
-	if len(hashcs.Hashes) != n {
+	if len(hashcs.Hashes) != n { // keep this test for accidental modifications to hashcs.Names and hashcs.Hashes
 		t.Fatalf("len(hashcs.Names) is %d; len(hashcs.Hashes) is %d", n, len(hashcs.Hashes))
 	}
 	for i := 0; i < n; i++ {
