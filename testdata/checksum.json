@@ -1,0 +1,233 @@
+[
+    {
+        "filename": "Isaac.Newton-Opticks.txt",
+        "checksums": [
+            {
+                "hashName": "MD4",
+                "checksum": "45ed1743d00fbf6e40547503c4d872a5"
+            },
+            {
+                "hashName": "MD5",
+                "checksum": "a2c87e985b24115b85a59cb86a2ff148"
+            },
+            {
+                "hashName": "SHA-1",
+                "checksum": "2e4fbf8af6e565d11d018ee741e9d4439dc4ee4f"
+            },
+            {
+                "hashName": "SHA-224",
+                "checksum": "f5b6ea4a8e187f72bad483b39a89aa008901f7acf8e2334bee0ccbca"
+            },
+            {
+                "hashName": "SHA-256",
+                "checksum": "d4a9ac22462b35e7821a4f2706c211093da678620a8f9997989ee7cf8d507bbd"
+            },
+            {
+                "hashName": "SHA-384",
+                "checksum": "b4f988ca06c4068b573345041d22d961cf237baa9e80c5013d037478c0e255545fe1fdd72a6834149e24236cc50c103a"
+            },
+            {
+                "hashName": "SHA-512",
+                "checksum": "afc1762334a976d425cf5678ad6d8c6abed55b1dc9b6a30e0c39ab3914aa4efe2f789ab682a152f8a330a4ecf9dd29522ac3cbe696f01419852073dd2d07d987"
+            },
+            {
+                "hashName": "SHA-512/224",
+                "checksum": "a86f4383d26826483350b54e29b7860a152cc92ffd9645029a808ac1"
+            },
+            {
+                "hashName": "SHA-512/256",
+                "checksum": "ed2295b0de95cc49091528c46e357e12168f3f5722ef2be72e7fdfbab4b8fafe"
+            },
+            {
+                "hashName": "RIPEMD-160",
+                "checksum": "7bbeec0c3e6d2b566495e31e48b208e00c77475f"
+            },
+            {
+                "hashName": "SHA3-224",
+                "checksum": "a802500ed169c4846bb5c644630a8dcfb4a3fe04df33ec6466ea7e7a"
+            },
+            {
+                "hashName": "SHA3-256",
+                "checksum": "1ce052a07593f034e23f8679465acc957372aae589865471b114179d2b3d3f3f"
+            },
+            {
+                "hashName": "SHA3-384",
+                "checksum": "a403bdc5bf462268d7f8f3dd39aea32a13c85be4c8001a70f115aef850bf6b72b1d2549ec34e6928cc2bcb154f0186f0"
+            },
+            {
+                "hashName": "SHA3-512",
+                "checksum": "7389f9a919a19f2dbe1ac9240fbc744d51bb18ac04a96329ab149ecfe2b1d1fae16ba11f41938395aa27f564f6d2b7be859edf0519d3cbda04b43db25c43f201"
+            },
+            {
+                "hashName": "BLAKE2s-256",
+                "checksum": "4b0df3f7fe8701cc30c8c17c8b9b049fe8445e592d35aa6bbe52bc5a01ac2897"
+            },
+            {
+                "hashName": "BLAKE2b-256",
+                "checksum": "7bee77e1a3e86799a54066fd78e97b0f735df8a5249f2af804cb287f1b650e09"
+            },
+            {
+                "hashName": "BLAKE2b-384",
+                "checksum": "9bfe0111979da1c357931d2b5e62a89f613c113eed9734534de1bb5c1589aba632b4cf0b71807f4f68d40b0b646fd5cb"
+            },
+            {
+                "hashName": "BLAKE2b-512",
+                "checksum": "a903a3dc1ddf7851209f5ff4cba92f404f424629828dc2f6026f119a1d013a84b0155def9768307b7437e5562a0c272b45ddbcee65bdfabc281c80502f90bd4d"
+            }
+        ]
+    },
+    {
+        "filename": "empty.txt",
+        "checksums": [
+            {
+                "hashName": "MD4",
+                "checksum": "31d6cfe0d16ae931b73c59d7e0c089c0"
+            },
+            {
+                "hashName": "MD5",
+                "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+            },
+            {
+                "hashName": "SHA-1",
+                "checksum": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+            },
+            {
+                "hashName": "SHA-224",
+                "checksum": "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f"
+            },
+            {
+                "hashName": "SHA-256",
+                "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+                "hashName": "SHA-384",
+                "checksum": "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b"
+            },
+            {
+                "hashName": "SHA-512",
+                "checksum": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+            },
+            {
+                "hashName": "SHA-512/224",
+                "checksum": "6ed0dd02806fa89e25de060c19d3ac86cabb87d6a0ddd05c333b84f4"
+            },
+            {
+                "hashName": "SHA-512/256",
+                "checksum": "c672b8d1ef56ed28ab87c3622c5114069bdd3ad7b8f9737498d0c01ecef0967a"
+            },
+            {
+                "hashName": "RIPEMD-160",
+                "checksum": "9c1185a5c5e9fc54612808977ee8f548b2258d31"
+            },
+            {
+                "hashName": "SHA3-224",
+                "checksum": "6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7"
+            },
+            {
+                "hashName": "SHA3-256",
+                "checksum": "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a"
+            },
+            {
+                "hashName": "SHA3-384",
+                "checksum": "0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004"
+            },
+            {
+                "hashName": "SHA3-512",
+                "checksum": "a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26"
+            },
+            {
+                "hashName": "BLAKE2s-256",
+                "checksum": "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9"
+            },
+            {
+                "hashName": "BLAKE2b-256",
+                "checksum": "0e5751c026e543b2e8ab2eb06099daa1d1e5df47778f7787faab45cdf12fe3a8"
+            },
+            {
+                "hashName": "BLAKE2b-384",
+                "checksum": "b32811423377f52d7862286ee1a72ee540524380fda1724a6f25d7978c6fd3244a6caf0498812673c5e05ef583825100"
+            },
+            {
+                "hashName": "BLAKE2b-512",
+                "checksum": "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"
+            }
+        ]
+    },
+    {
+        "filename": "roses-are-red.txt",
+        "checksums": [
+            {
+                "hashName": "MD4",
+                "checksum": "df6be9c2d0c2ff052b581de62dd78638"
+            },
+            {
+                "hashName": "MD5",
+                "checksum": "e047fdd95d6cdc3a4faf18c098f5eb7b"
+            },
+            {
+                "hashName": "SHA-1",
+                "checksum": "34750e274c60a44e04aa39f60abde33c4c8d7613"
+            },
+            {
+                "hashName": "SHA-224",
+                "checksum": "16754afe3f6357c41ad282e35ab6b094e93ccd00ae006aa5e137e71d"
+            },
+            {
+                "hashName": "SHA-256",
+                "checksum": "e5333d133e9c277013106f91d6dee8f31c6cc8779c64a3053277259a8d144633"
+            },
+            {
+                "hashName": "SHA-384",
+                "checksum": "8ab211a9483078525aa1153bad15c47471a522d56ff28a808e98b5b76257d8f5d3e9b1c5f0b60c7ff4bef302529df7d6"
+            },
+            {
+                "hashName": "SHA-512",
+                "checksum": "76a58626e0d3c1d45cb2f2a5a0e4f70007700faca128656c22a0bfc99360d1b8c8fa016bab5c5dd43ed8e41cd7858344f75b0c61fb1b959ce5e0ce805e7f7db5"
+            },
+            {
+                "hashName": "SHA-512/224",
+                "checksum": "34b16ac483b637c2247c0cd9d998ce2b36a9a3606e09e0d7faaadf9b"
+            },
+            {
+                "hashName": "SHA-512/256",
+                "checksum": "75056a49a00dc1fcc902bf3afa00800c18e18272cb4151178f0bd3db7e231c2c"
+            },
+            {
+                "hashName": "RIPEMD-160",
+                "checksum": "a31035a0dc3f1fd92438b5b12128e7d24eae6312"
+            },
+            {
+                "hashName": "SHA3-224",
+                "checksum": "1b167eed0785c7c9a25ae038f1bb100ddddceb46f49c148c7dbc199e"
+            },
+            {
+                "hashName": "SHA3-256",
+                "checksum": "d46f969e0709188d49d5474da0f82125f7c957af9e1669efcaca4a02beff2d84"
+            },
+            {
+                "hashName": "SHA3-384",
+                "checksum": "ba9f6f31219350c81b36e51e86100ad8d8b99978d91111f3b504a26263ef712715f52e709d41e5767d6bd1f3532c5b99"
+            },
+            {
+                "hashName": "SHA3-512",
+                "checksum": "9dca82509f2175cfd4304b7c2fc2697953244eaee31fcdce016506df4edf15cf7ad2d3c646be6088df1219a2a36c8f811f22c362cf753c0d31950a49a5d69c5b"
+            },
+            {
+                "hashName": "BLAKE2s-256",
+                "checksum": "624c00f308fbd1e49c8661f3bd8add30f491035d8c767f0bc8f6fea98a9b4620"
+            },
+            {
+                "hashName": "BLAKE2b-256",
+                "checksum": "43a24bfed6e0207a3b7b27176cbb15aab00d8dcf29bce56913563d8ef98b8821"
+            },
+            {
+                "hashName": "BLAKE2b-384",
+                "checksum": "19329b294f5c824f32611977cd2063ceb2344d36771a8ba454c03d3ac1070c66d60a006ac7e5f9ff036392811eb7e215"
+            },
+            {
+                "hashName": "BLAKE2b-512",
+                "checksum": "9e43170c211f46793426a3ac4422fe5c035e191f431e80a3a54bcff4510ae665c609a72d6b749a11d2dd38634049616a62d1ab018e774e5f42f7d0d13fe2b728"
+            }
+        ]
+    }
+]

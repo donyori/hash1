@@ -41,7 +41,7 @@ var printCmd = &cobra.Command{
 	Long: `Print (hash1 print) outputs the hash checksum of the specified local file
 to the console or a target file (see the flag "output" ("o" for short)).
 
-The 18 supported hash algorithms are listed as follows:
+The supported hash algorithms are listed as follows:
     MD4, MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, SHA-512/256,
     RIPEMD-160, SHA3-224, SHA3-256, SHA3-384, SHA3-512, BLAKE2s-256, BLAKE2b-256,
     BLAKE2b-384, BLAKE2b-512
@@ -51,7 +51,7 @@ The provided hash algorithm names must be in lowercase, separated by commas (','
 The hyphens ('-') and slashes ('/') in the name can be replaced with underscores ('_')
 or omitted (for example, "sha-512/224" can be "sha_512_224" or "sha512224").
 Or more conveniently, the user can set the flag "md5" ("m" for short) to use MD5,
-or set the flag "all" ("a" for short) to use all the 18 hash algorithms.
+or set the flag "all" ("a" for short) to use all the supported hash algorithms.
 These three flags are mutually exclusive: only one of them can be used at the same time.
 If the user does not specify a hash algorithm, SHA-256 is used by default.
 
@@ -70,7 +70,7 @@ To use uppercase, the user can set the flag "upper" ("u" for short).`,
 		switch {
 		case printFlagAll:
 			hashNames = make([]string, len(hashcs.Names))
-			for i := range hashNames {
+			for i := range hashcs.Names {
 				hashNames[i] = hashcs.Names[i][0]
 			}
 		case printFlagMD5:
@@ -131,7 +131,7 @@ the standard error stream. By default, the standard output stream is used.`)
 // upper indicates whether to output the result in uppercase.
 //
 // inJSON indicates whether to output the result in JSON format.
-func printChecksum(output, input string, upper, inJSON bool, hashNames []string) error {
+func printChecksum(output, input string, upper, inJSON bool, hashNames []string) (err error) {
 	checksums, err := hashcs.CalculateChecksum(input, upper, hashNames)
 	if err != nil {
 		return errors.AutoWrap(err)
@@ -143,12 +143,20 @@ func printChecksum(output, input string, upper, inJSON bool, hashNames []string)
 	case "STDERR":
 		w = os.Stderr
 	default:
-		writer, err := local.WriteTrunc(output, 0644, true, nil)
+		var writer filesys.Writer
+		writer, err = local.WriteTrunc(output, 0644, true, nil)
 		if err != nil {
 			return errors.AutoWrap(err)
 		}
 		defer func(writer filesys.Writer) {
-			_ = writer.Close() // ignore error
+			if e := writer.Close(); e != nil {
+				if err == nil {
+					err = errors.AutoWrapSkip(e, 1) // skip the inner function
+				} else {
+					err, _ = errors.UnwrapAutoWrappedError(err)
+					err = errors.AutoWrapSkip(errors.Combine(err, e), 1) // skip the inner function
+				}
+			}
 		}(writer)
 		w = writer
 	}

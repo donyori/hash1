@@ -75,7 +75,6 @@ func TestHashesAvailable(t *testing.T) {
 }
 
 func TestCalculateChecksum(t *testing.T) {
-	checksumMap := LazyLoadTestFilenameHashChecksumMap()
 	hashNames := make([]string, 0, len(hashcs.NameRankMap)*2)
 	for _, group := range hashcs.Names {
 		for _, name := range group {
@@ -85,11 +84,9 @@ func TestCalculateChecksum(t *testing.T) {
 	rand.New(rand.NewSource(10)).Shuffle(len(hashNames), func(i, j int) {
 		hashNames[i], hashNames[j] = hashNames[j], hashNames[i]
 	})
-	for _, entry := range LazyLoadTestFileEntries() {
-		entryName := entry.Name()
+	for entryName, m := range LazyLoadTestFilenameHashChecksumMap() {
 		t.Run(fmt.Sprintf("file=%+q", entryName), func(t *testing.T) {
 			filename := filepath.Join(TestDataDir, entryName)
-			m := checksumMap[entryName]
 			for _, upper := range []bool{false, true} {
 				n := len(hashcs.Hashes)
 				want := make([]hashcs.HashChecksum, n)
@@ -120,12 +117,10 @@ func TestCalculateChecksum(t *testing.T) {
 }
 
 func TestCalculateChecksum_NoHashNames(t *testing.T) {
-	checksumMap := LazyLoadTestFilenameHashChecksumMap()
-	for _, entry := range LazyLoadTestFileEntries() {
-		entryName := entry.Name()
+	for entryName, m := range LazyLoadTestFilenameHashChecksumMap() {
 		t.Run(fmt.Sprintf("file=%+q", entryName), func(t *testing.T) {
 			filename := filepath.Join(TestDataDir, entryName)
-			checksum := checksumMap[entryName][crypto.SHA256]
+			checksum := m[crypto.SHA256]
 			for _, upper := range []bool{false, true} {
 				want := []hashcs.HashChecksum{{HashName: crypto.SHA256.String()}}
 				s := checksum
@@ -172,8 +167,7 @@ func TestCalculateChecksum_Dir(t *testing.T) {
 }
 
 func TestCalculateChecksum_UnknownHashName(t *testing.T) {
-	for _, entry := range LazyLoadTestFileEntries() {
-		entryName := entry.Name()
+	for entryName := range LazyLoadTestFilenameHashChecksumMap() {
 		t.Run(fmt.Sprintf("file=%+q", entryName), func(t *testing.T) {
 			filename := filepath.Join(TestDataDir, entryName)
 			for _, upper := range []bool{false, true} {
