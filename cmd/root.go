@@ -45,6 +45,9 @@ func Execute() {
 	}
 }
 
+// globalFlagDebug is a global flag for debugging mode.
+var globalFlagDebug bool
+
 func init() {
 	// Prepend a short copyright notice to the default help template.
 	rootCmd.SetHelpTemplate(`hash1  Copyright (C) 2023  Yuan Gao
@@ -56,4 +59,17 @@ Program source: <https://github.com/donyori/hash1>.
 {{with (or .Long .Short)}}{{. | trimTrailingWhitespaces}}
 
 {{end}}{{if or .Runnable .HasSubCommands}}{{.UsageString}}{{end}}`)
+
+	// Append a short copyright notice to the default version template
+	// and replace "version " with "v".
+	rootCmd.SetVersionTemplate(`{{with .Name}}{{printf "%s " .}}{{end}}{{printf "v%s" .Version}}
+Copyright (C) 2023  Yuan Gao
+This program comes with ABSOLUTELY NO WARRANTY; for details type "hash1 show w".
+This is free software, and you are welcome to redistribute it
+under certain conditions; type "hash1 show c" for details.
+Program source: <https://github.com/donyori/hash1>.
+`)
+
+	rootCmd.PersistentFlags().BoolVar(&globalFlagDebug, "debug", false,
+		"print more information when encountering an error")
 }

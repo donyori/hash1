@@ -87,8 +87,13 @@ To use uppercase, the user can set the flag "upper" ("u" for short).`,
 			printFlagJSON,
 			hashNames,
 		)
-		err, _ = errors.UnwrapAllAutoWrappedErrors(err)
-		cobra.CheckErr(err)
+		var errMsg any
+		if globalFlagDebug {
+			errMsg = appendFunctionNamesToError(err)
+		} else {
+			errMsg, _ = errors.UnwrapAllAutoWrappedErrors(err)
+		}
+		cobra.CheckErr(errMsg)
 	},
 }
 
@@ -114,8 +119,9 @@ func init() {
 	printCmd.Flags().BoolVarP(&printFlagMD5, "md5", "m", false,
 		"use the MD5 hash algorithm")
 	printCmd.Flags().StringVarP(&printFlagOutput, "output", "o", "",
-		`Specify the output file. In particular, "STDERR" (in uppercase) represents
-the standard error stream. By default, the standard output stream is used.`)
+		`specify the output file
+In particular, "STDERR" (in uppercase) represents the standard error stream.
+By default, the standard output stream is used.`)
 	printCmd.Flags().BoolVarP(&printFlagUpper, "upper", "u", false,
 		"output the result in uppercase (lowercase by default)")
 
@@ -150,12 +156,8 @@ func printChecksum(output, input string, upper, inJSON bool, hashNames []string)
 		}
 		defer func(writer filesys.Writer) {
 			if e := writer.Close(); e != nil {
-				if err == nil {
-					err = errors.AutoWrapSkip(e, 1) // skip the inner function
-				} else {
-					err, _ = errors.UnwrapAutoWrappedError(err)
-					err = errors.AutoWrapSkip(errors.Combine(err, e), 1) // skip the inner function
-				}
+				err, _ = errors.UnwrapAutoWrappedError(err)          // err is auto-wrapped by printChecksum; unwrap that
+				err = errors.AutoWrapSkip(errors.Combine(err, e), 1) // skip the inner function
 			}
 		}(writer)
 		w = writer

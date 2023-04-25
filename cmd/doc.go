@@ -16,11 +16,5 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// Package cmd provides the implementation of the commands.
 package cmd
-
-// Export for testing only.
-
-var (
-	AppendFunctionNamesToError = appendFunctionNamesToError
-	PrintChecksum              = printChecksum
-)
