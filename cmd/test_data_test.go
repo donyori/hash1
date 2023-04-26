@@ -66,14 +66,14 @@ func init() {
 	hashNameRankMaps = make([]map[string]int, len(testFileChecksums))
 	for i := range testFileChecksums {
 		checksums := testFileChecksums[i].Checksums
-		m := make(map[string]int, len(checksums))
+		m := make(map[string]int)
 		for j := range checksums {
 			name := strings.ToLower(checksums[j].HashName)
 			m[name] = j + 1
-			for k := range hashcs.Names {
-				if hashcs.Names[k][0] == name {
-					for aliasIdx := 1; aliasIdx < len(hashcs.Names[k]); aliasIdx++ {
-						m[hashcs.Names[k][aliasIdx]] = j + 1
+			for _, names := range hashcs.Names {
+				if names[0] == name {
+					for aliasIdx := 1; aliasIdx < len(names); aliasIdx++ {
+						m[names[aliasIdx]] = j + 1
 					}
 					break
 				}

@@ -63,14 +63,14 @@ To use uppercase, the user can set the flag "upper" ("u" for short).`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			cobra.CheckErr(cmd.Help())
+			checkErr(globalFlagDebug, cmd.Help())
 			return
 		}
 		var hashNames []string
 		switch {
 		case printFlagAll:
-			hashNames = make([]string, len(hashcs.Names))
-			for i := range hashcs.Names {
+			hashNames = make([]string, hashcs.NumHash)
+			for i := 0; i < hashcs.NumHash; i++ {
 				hashNames[i] = hashcs.Names[i][0]
 			}
 		case printFlagMD5:
@@ -80,20 +80,16 @@ To use uppercase, the user can set the flag "upper" ("u" for short).`,
 				return r == ',' || unicode.IsSpace(r)
 			})
 		}
-		err := printChecksum(
-			printFlagOutput,
-			args[0],
-			printFlagUpper,
-			printFlagJSON,
-			hashNames,
+		checkErr(
+			globalFlagDebug,
+			printChecksum(
+				printFlagOutput,
+				args[0],
+				printFlagUpper,
+				printFlagJSON,
+				hashNames,
+			),
 		)
-		var errMsg any
-		if globalFlagDebug {
-			errMsg = appendFunctionNamesToError(err)
-		} else {
-			errMsg, _ = errors.UnwrapAllAutoWrappedErrors(err)
-		}
-		cobra.CheckErr(errMsg)
 	},
 }
 
@@ -121,6 +117,7 @@ func init() {
 	printCmd.Flags().StringVarP(&printFlagOutput, "output", "o", "",
 		`specify the output file
 In particular, "STDERR" (in uppercase) represents the standard error stream.
+To specify the file named STDERR under the current directory, use "./STDERR".
 By default, the standard output stream is used.`)
 	printCmd.Flags().BoolVarP(&printFlagUpper, "upper", "u", false,
 		"output the result in uppercase (lowercase by default)")

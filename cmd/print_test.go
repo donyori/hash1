@@ -44,8 +44,8 @@ func TestPrintChecksum(t *testing.T) {
 		inputList[i] = filepath.Join(TestDataDir, testFileChecksums[i].Filename)
 	}
 
-	allHashNames := make([]string, len(hashcs.Names))
-	for i := range hashcs.Names {
+	allHashNames := make([]string, hashcs.NumHash)
+	for i := 0; i < hashcs.NumHash; i++ {
 		allHashNames[i] = hashcs.Names[i][0]
 	}
 	hashNamesList := [][]string{nil, {}, {"md5"}, allHashNames, {"s", "m", "sha256"}}

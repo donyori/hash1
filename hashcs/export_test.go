@@ -21,6 +21,6 @@ package hashcs
 // Export for testing only.
 
 var (
-	NameRankMap = nameRankMap
 	HashRankMap = hashRankMap
+	NameRankMap = nameRankMap
 )

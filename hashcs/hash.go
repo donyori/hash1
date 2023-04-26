@@ -36,11 +36,40 @@ import (
 	_ "golang.org/x/crypto/sha3"      // link crypto.SHA3_224, crypto.SHA3_256, crypto.SHA3_384, and crypto.SHA3_512 to the binary
 )
 
+// NumHash is the number of supported hash algorithms.
+const NumHash int = 18
+
+// Hashes are the supported hash algorithms.
+//
+// All its items are available (i.e., have been linked to the binary).
+var Hashes = [NumHash]crypto.Hash{
+	crypto.MD4,
+	crypto.MD5,
+	crypto.SHA1,
+	crypto.SHA224,
+	crypto.SHA256,
+	crypto.SHA384,
+	crypto.SHA512,
+	crypto.SHA512_224,
+	crypto.SHA512_256,
+	crypto.RIPEMD160,
+	crypto.SHA3_224,
+	crypto.SHA3_256,
+	crypto.SHA3_384,
+	crypto.SHA3_512,
+	crypto.BLAKE2s_256,
+	crypto.BLAKE2b_256,
+	crypto.BLAKE2b_384,
+	crypto.BLAKE2b_512,
+}
+
 // Names are the names and aliases of the supported hash algorithms.
 //
 // Each item (of type []string) starts with the hash algorithm name,
 // followed by its aliases.
-var Names = [...][]string{
+// The hash algorithm name is the lowercase of the name returned by
+// the method String of the corresponding crypto.Hash.
+var Names = [NumHash][]string{
 	{"md4"},
 	{"md5", "m"},
 	{"sha-1", "sha_1", "sha1"},
@@ -69,51 +98,27 @@ var Names = [...][]string{
 	{"blake2b-512", "blake2b_512", "blake2b512"},
 }
 
-// Hashes are the supported hash algorithms.
-//
-// All its items are available (i.e., have been linked to the binary).
-var Hashes = [...]crypto.Hash{
-	crypto.MD4,
-	crypto.MD5,
-	crypto.SHA1,
-	crypto.SHA224,
-	crypto.SHA256,
-	crypto.SHA384,
-	crypto.SHA512,
-	crypto.SHA512_224,
-	crypto.SHA512_256,
-	crypto.RIPEMD160,
-	crypto.SHA3_224,
-	crypto.SHA3_256,
-	crypto.SHA3_384,
-	crypto.SHA3_512,
-	crypto.BLAKE2s_256,
-	crypto.BLAKE2b_256,
-	crypto.BLAKE2b_384,
-	crypto.BLAKE2b_512,
-}
+// hashRankMap is a map from crypto.Hash values to
+// their ranks in Hashes.
+// The rank is the index plus one.
+var hashRankMap = make(map[crypto.Hash]int, NumHash)
 
 // nameRankMap is a map from hash algorithm names and their aliases
 // to their ranks in Names.
 // The rank is the index plus one.
 var nameRankMap = make(map[string]int)
 
-// hashRankMap is a map from crypto.Hash values to
-// their ranks in Hashes.
-// The rank is the index plus one.
-var hashRankMap = make(map[crypto.Hash]int, len(Hashes))
-
 func init() {
 	// ATTENTION!
 	// Make nameRankMap and hashRankMap in their declaration rather than
 	// in function init to facilitate exporting them for testing.
+	for i := range Hashes {
+		hashRankMap[Hashes[i]] = i + 1
+	}
 	for i := range Names {
 		for _, name := range Names[i] {
 			nameRankMap[name] = i + 1
 		}
-	}
-	for i := range Hashes {
-		hashRankMap[Hashes[i]] = i + 1
 	}
 }
 
@@ -153,6 +158,10 @@ type HashChecksum struct {
 //
 // The returned checksums are sorted in the order of
 // their names displayed in Names.
+//
+// For each item in the returned checksums,
+// the field HashName is the name returned by the method String
+// of the corresponding crypto.Hash.
 func CalculateChecksum(filename string, upper bool, hashNames []string) (
 	checksums []HashChecksum, err error) {
 	if len(hashNames) == 0 {

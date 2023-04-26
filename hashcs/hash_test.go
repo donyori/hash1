@@ -35,28 +35,40 @@ import (
 )
 
 func TestNamesAndHashesConsistent(t *testing.T) {
-	nameSet := make(map[string]bool, len(hashcs.NameRankMap))
-	for i, group := range hashcs.Names {
-		for j, name := range group {
-			if nameSet[name] {
-				t.Errorf("%s (Group %d, Item %d) is duplicate", name, i, j)
-			}
-			nameSet[name] = true
-		}
-	}
 	hashSet := make(map[crypto.Hash]bool, len(hashcs.HashRankMap))
 	for i, h := range hashcs.Hashes {
-		if hashSet[h] {
-			t.Errorf("%v (Item %d) is duplicate", h, i)
+		switch {
+		case h == 0:
+			t.Errorf("Item %d of hashcs.Hashes is 0", i)
+		case hashSet[h]:
+			t.Errorf("%v (Item %d of hashcs.Hashes) is duplicate", h, i)
+		default:
+			hashSet[h] = true
 		}
-		hashSet[h] = true
 	}
 
-	n := len(hashcs.Names)
-	if len(hashcs.Hashes) != n { // keep this test for accidental modifications to hashcs.Names and hashcs.Hashes
-		t.Fatalf("len(hashcs.Names) is %d; len(hashcs.Hashes) is %d", n, len(hashcs.Hashes))
+	nameSet := make(map[string]bool, len(hashcs.NameRankMap))
+	for i, group := range hashcs.Names {
+		if len(group) == 0 {
+			t.Errorf("Group %d of hashcs.Names is empty", i)
+		}
+		for j, name := range group {
+			switch {
+			case name == "":
+				t.Errorf("Group %d, Item %d of hashcs.Names is empty", i, j)
+			case nameSet[name]:
+				t.Errorf("%s (Group %d, Item %d of hashcs.Names) is duplicate",
+					name, i, j)
+			default:
+				nameSet[name] = true
+			}
+		}
 	}
-	for i := 0; i < n; i++ {
+
+	if t.Failed() {
+		return
+	}
+	for i := 0; i < hashcs.NumHash; i++ {
 		if hashcs.Names[i][0] != strings.ToLower(hashcs.Hashes[i].String()) {
 			t.Errorf("hashcs.Names[%d][0] is %s; hashcs.Hashes[%[1]d] is %[3]v; mismatch",
 				i, hashcs.Names[i][0], hashcs.Hashes[i])
@@ -88,9 +100,8 @@ func TestCalculateChecksum(t *testing.T) {
 		t.Run(fmt.Sprintf("file=%+q", entryName), func(t *testing.T) {
 			filename := filepath.Join(TestDataDir, entryName)
 			for _, upper := range []bool{false, true} {
-				n := len(hashcs.Hashes)
-				want := make([]hashcs.HashChecksum, n)
-				for i := 0; i < n; i++ {
+				want := make([]hashcs.HashChecksum, hashcs.NumHash)
+				for i := 0; i < hashcs.NumHash; i++ {
 					s := m[hashcs.Hashes[i]]
 					if upper {
 						s = strings.ToUpper(s)

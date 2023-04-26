@@ -38,7 +38,7 @@ of the GNU Affero General Public License.
 	Args:      cobra.MatchAll(cobra.MaximumNArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			cobra.CheckErr(cmd.Help())
+			checkErr(globalFlagDebug, cmd.Help())
 		} else if args[0] == "w" || args[0] == "warranty" {
 			fmt.Println(agpl3.DisclaimerOfWarranty)
 		} else {

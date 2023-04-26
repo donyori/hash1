@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/donyori/gogo/errors"
+	"github.com/spf13/cobra"
 )
 
 // appendFunctionNamesToError appends the full function names recorded in
@@ -56,4 +57,18 @@ func appendFunctionNamesToError(err error) any {
 		b.WriteString(name)
 	}
 	return b.String()
+}
+
+// checkErr applies appendFunctionNamesToError to err if debugFlag is set.
+// Otherwise, checkErr applies
+// github.com/donyori/gogo/errors.UnwrapAllAutoWrappedErrors to err.
+// Finally, checkErr calls github.com/spf13/cobra.CheckErr on the above result.
+func checkErr(debugFlag bool, err error) {
+	var errMsg any
+	if debugFlag {
+		errMsg = appendFunctionNamesToError(err)
+	} else {
+		errMsg, _ = errors.UnwrapAllAutoWrappedErrors(err)
+	}
+	cobra.CheckErr(errMsg)
 }
