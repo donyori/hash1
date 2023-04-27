@@ -23,4 +23,7 @@ package cmd
 var (
 	AppendFunctionNamesToError = appendFunctionNamesToError
 	PrintChecksum              = printChecksum
+	VerifyChecksum             = verifyChecksum
 )
+
+var VerifyFlagNamesHashChecksum = verifyFlagNamesHashChecksum

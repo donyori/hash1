@@ -48,7 +48,13 @@ func TestPrintChecksum(t *testing.T) {
 	for i := 0; i < hashcs.NumHash; i++ {
 		allHashNames[i] = hashcs.Names[i][0]
 	}
-	hashNamesList := [][]string{nil, {}, {"md5"}, allHashNames, {"s", "m", "sha256"}}
+	hashNamesList := [][]string{
+		nil,
+		{},
+		{"md5"},
+		allHashNames,
+		{"s", "m", "sha256"},
+	}
 
 	testCases := make([]struct {
 		output, input string
@@ -132,15 +138,20 @@ func TestPrintChecksum(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		var outputName string
+		if tc.output != "" {
+			outputName = filepath.Base(tc.output)
+		}
+		outputName = strconv.QuoteToASCII(outputName)
 		hashNamesName := "<nil>"
 		if tc.hashNames != nil {
 			hashNamesName = strconv.QuoteToASCII(strings.Join(tc.hashNames, ","))
 		}
 		t.Run(
 			fmt.Sprintf(
-				"output=%+q&input=%+q&upper=%t&inJSON=%t&hashNames=%s",
-				tc.output,
-				tc.input,
+				"output=%s&input=%+q&upper=%t&inJSON=%t&hashNames=%s",
+				outputName,
+				filepath.Base(tc.input),
 				tc.upper,
 				tc.inJSON,
 				hashNamesName,
