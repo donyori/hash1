@@ -118,7 +118,7 @@ func TestCalculateChecksum(t *testing.T) {
 					got, err := hashcs.CalculateChecksum(filename, upper, hashNames)
 					if err != nil {
 						t.Error("CalculateChecksum -", err)
-					} else if !compare.ComparableSliceEqual(got, want) {
+					} else if !compare.SliceEqual(got, want) {
 						t.Errorf("got %+v\nwant %+v", got, want)
 					}
 				})
@@ -151,7 +151,7 @@ func TestCalculateChecksum_NoHashNames(t *testing.T) {
 						got, err := hashcs.CalculateChecksum(filename, upper, hashNames)
 						if err != nil {
 							t.Error("CalculateChecksum -", err)
-						} else if !compare.ComparableSliceEqual(got, want) {
+						} else if !compare.SliceEqual(got, want) {
 							t.Errorf("got %+v\nwant %+v", got, want)
 						}
 					})
