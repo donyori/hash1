@@ -97,7 +97,8 @@ It may be useful when using this program in scripts.`,
 		default:
 			fmt.Println("FAIL")
 			for i := range mismatch {
-				fmt.Printf("%s: %s\n", mismatch[i].HashName, mismatch[i].Checksum)
+				fmt.Printf("%s: %s\n",
+					mismatch[i].HashName, mismatch[i].Checksum)
 			}
 			os.Exit(ExitCodeVerifyFail)
 		}

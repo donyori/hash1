@@ -35,32 +35,30 @@ import (
 )
 
 func TestNamesAndHashesConsistent(t *testing.T) {
-	hashSet := make(map[crypto.Hash]bool, len(hashcs.HashRankMap))
+	hashSet := make(map[crypto.Hash]struct{}, len(hashcs.HashRankMap))
 	for i, h := range hashcs.Hashes {
-		switch {
-		case h == 0:
+		if h == 0 {
 			t.Errorf("Item %d of hashcs.Hashes is 0", i)
-		case hashSet[h]:
+		} else if _, ok := hashSet[h]; ok {
 			t.Errorf("%v (Item %d of hashcs.Hashes) is duplicate", h, i)
-		default:
-			hashSet[h] = true
+		} else {
+			hashSet[h] = struct{}{}
 		}
 	}
 
-	nameSet := make(map[string]bool, len(hashcs.NameRankMap))
+	nameSet := make(map[string]struct{}, len(hashcs.NameRankMap))
 	for i, group := range hashcs.Names {
 		if len(group) == 0 {
 			t.Errorf("Group %d of hashcs.Names is empty", i)
 		}
 		for j, name := range group {
-			switch {
-			case name == "":
+			if name == "" {
 				t.Errorf("Group %d, Item %d of hashcs.Names is empty", i, j)
-			case nameSet[name]:
+			} else if _, ok := nameSet[name]; ok {
 				t.Errorf("%s (Group %d, Item %d of hashcs.Names) is duplicate",
 					name, i, j)
-			default:
-				nameSet[name] = true
+			} else {
+				nameSet[name] = struct{}{}
 			}
 		}
 	}
@@ -115,7 +113,8 @@ func TestCalculateChecksum(t *testing.T) {
 				}
 
 				t.Run(fmt.Sprintf("upper=%t", upper), func(t *testing.T) {
-					got, err := hashcs.CalculateChecksum(filename, upper, hashNames)
+					got, err := hashcs.CalculateChecksum(
+						filename, upper, hashNames)
 					if err != nil {
 						t.Error("CalculateChecksum -", err)
 					} else if !compare.SliceEqual(got, want) {
@@ -133,7 +132,9 @@ func TestCalculateChecksum_NoHashNames(t *testing.T) {
 			filename := filepath.Join(TestDataDir, entryName)
 			checksum := m[crypto.SHA256]
 			for _, upper := range []bool{false, true} {
-				want := []hashcs.HashChecksum{{HashName: crypto.SHA256.String()}}
+				want := []hashcs.HashChecksum{
+					{HashName: crypto.SHA256.String()},
+				}
 				s := checksum
 				if upper {
 					s = strings.ToUpper(s)
@@ -147,14 +148,19 @@ func TestCalculateChecksum_NoHashNames(t *testing.T) {
 					if hashNames != nil {
 						hashNamesDisplay = "[]"
 					}
-					t.Run(fmt.Sprintf("upper=%t&hashNames=%s", upper, hashNamesDisplay), func(t *testing.T) {
-						got, err := hashcs.CalculateChecksum(filename, upper, hashNames)
-						if err != nil {
-							t.Error("CalculateChecksum -", err)
-						} else if !compare.SliceEqual(got, want) {
-							t.Errorf("got %+v\nwant %+v", got, want)
-						}
-					})
+					t.Run(
+						fmt.Sprintf("upper=%t&hashNames=%s",
+							upper, hashNamesDisplay),
+						func(t *testing.T) {
+							got, err := hashcs.CalculateChecksum(
+								filename, upper, hashNames)
+							if err != nil {
+								t.Error("CalculateChecksum -", err)
+							} else if !compare.SliceEqual(got, want) {
+								t.Errorf("got %+v\nwant %+v", got, want)
+							}
+						},
+					)
 				}
 			}
 		})
@@ -164,9 +170,7 @@ func TestCalculateChecksum_NoHashNames(t *testing.T) {
 func TestCalculateChecksum_Dir(t *testing.T) {
 	allNames := make([]string, 0, len(hashcs.NameRankMap))
 	for _, group := range hashcs.Names {
-		for _, name := range group {
-			allNames = append(allNames, name)
-		}
+		allNames = append(allNames, group...)
 	}
 	got, err := hashcs.CalculateChecksum(TestDataDir, false, allNames)
 	if !errors.Is(err, filesys.ErrIsDir) {
@@ -190,19 +194,26 @@ func TestCalculateChecksum_UnknownHashName(t *testing.T) {
 						hashNames,
 						&fmtcoll.SequenceFormat[string]{
 							CommonFormat: fmtcoll.CommonFormat{Separator: ","},
-							FormatItemFn: fmtcoll.FprintfToFormatFunc[string]("%+q"),
+							FormatItemFn: fmtcoll.FprintfToFormatFunc[string](
+								"%+q"),
 						},
 					)
-					t.Run(fmt.Sprintf("upper=%t&hashNames=%s", upper, hashNamesDisplay), func(t *testing.T) {
-						got, err := hashcs.CalculateChecksum(filename, upper, hashNames)
-						var target *hashcs.UnknownHashAlgorithmError
-						if !errors.As(err, &target) {
-							t.Errorf("got error %#v; want a *hashcs.UnknownHashAlgorithmError", err)
-						}
-						if got != nil {
-							t.Errorf("got checksums %+v; want nil", got)
-						}
-					})
+					t.Run(
+						fmt.Sprintf("upper=%t&hashNames=%s",
+							upper, hashNamesDisplay),
+						func(t *testing.T) {
+							got, err := hashcs.CalculateChecksum(
+								filename, upper, hashNames)
+							var target *hashcs.UnknownHashAlgorithmError
+							if !errors.As(err, &target) {
+								t.Errorf("got error %#v; want a *hashcs.UnknownHashAlgorithmError",
+									err)
+							}
+							if got != nil {
+								t.Errorf("got checksums %+v; want nil", got)
+							}
+						},
+					)
 				}
 			}
 		})

@@ -19,29 +19,119 @@
 package cmd_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/donyori/gogo/filesys/local"
 
 	"github.com/donyori/hash1/cmd"
 	"github.com/donyori/hash1/hashcs"
 )
 
-func TestPrintChecksum(t *testing.T) {
-	stdout, stderr := os.Stdout, os.Stderr // backup stdout and stderr
+type printChecksumTestCase struct {
+	output    string
+	input     string
+	upper     bool
+	inJSON    bool
+	hashNames []string
+	want      string
+}
 
-	tmpDir := t.TempDir()
-	outputList := []string{"", "STDERR", filepath.Join(tmpDir, "output.dat")}
+func TestPrintChecksum(t *testing.T) {
+	for _, tc := range getTestCasesForPrintChecksum(t) {
+		var outputName string
+		if tc.output != "" {
+			outputName = filepath.Base(tc.output)
+		}
+		outputName = strconv.QuoteToASCII(outputName)
+		hashNamesName := "<nil>"
+		if tc.hashNames != nil {
+			hashNamesName = strconv.QuoteToASCII(
+				strings.Join(tc.hashNames, ","))
+		}
+		t.Run(
+			fmt.Sprintf(
+				"output=%s&input=%+q&upper=%t&inJSON=%t&hashNames=%s",
+				outputName,
+				filepath.Base(tc.input),
+				tc.upper,
+				tc.inJSON,
+				hashNamesName,
+			),
+			func(t *testing.T) {
+				// Capture stdout or stderr as needed.
+				var f local.CaptureToStringFunc
+				if tc.output == "" {
+					var err error
+					f, err = local.CaptureStdoutToString()
+					if err != nil {
+						t.Fatal("capture stdout -", err)
+					}
+				} else if tc.output == "STDERR" {
+					var err error
+					f, err = local.CaptureStderrToString()
+					if err != nil {
+						t.Fatal("capture stderr -", err)
+					}
+				}
+
+				err := cmd.PrintChecksum(
+					tc.output,
+					tc.input,
+					tc.upper,
+					tc.inJSON,
+					tc.hashNames,
+				)
+				// Restore stdout and stderr via f before checking err.
+				var got string
+				if f != nil {
+					var e error
+					got, e, _ = f()
+					if e != nil {
+						if err != nil {
+							t.Error("PrintChecksum -", err)
+						}
+						t.Fatal("f (local.CaptureToStringFunc) -", err)
+					}
+				}
+				if err != nil {
+					t.Fatal("PrintChecksum -", err)
+				} else if f == nil {
+					var gotBytes []byte
+					gotBytes, err = os.ReadFile(tc.output)
+					if err != nil {
+						t.Fatal("read output -", err)
+					}
+					got = string(gotBytes)
+				}
+
+				if got != tc.want {
+					t.Errorf("got %s\nwant %s", got, tc.want)
+				}
+			},
+		)
+	}
+}
+
+// getTestCasesForPrintChecksum returns test cases for TestPrintChecksum.
+//
+// It uses t.Fatal and t.Fatalf to stop the test if something is wrong.
+func getTestCasesForPrintChecksum(t *testing.T) []printChecksumTestCase {
+	outputList := []string{
+		"",
+		"STDERR",
+		filepath.Join(t.TempDir(), "output.dat"),
+	}
 	inputList := make([]string, len(testFileChecksums))
 	for i := range testFileChecksums {
-		inputList[i] = filepath.Join(TestDataDir, testFileChecksums[i].Filename)
+		inputList[i] = filepath.Join(
+			TestDataDir, testFileChecksums[i].Filename)
 	}
 
 	allHashNames := make([]string, hashcs.NumHash)
@@ -56,14 +146,10 @@ func TestPrintChecksum(t *testing.T) {
 		{"s", "m", "sha256"},
 	}
 
-	testCases := make([]struct {
-		output, input string
-		upper, inJSON bool
-		hashNames     []string
-		want          []byte
-	}, len(outputList)*len(inputList)*2*2*len(hashNamesList))
-	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
+	testCases := make([]printChecksumTestCase,
+		len(outputList)*len(inputList)*2*2*len(hashNamesList))
+	var b strings.Builder
+	enc := json.NewEncoder(&b)
 	enc.SetIndent("", "    ")
 	var idx int
 	for _, output := range outputList {
@@ -76,136 +162,89 @@ func TestPrintChecksum(t *testing.T) {
 						testCases[idx].upper = upper
 						testCases[idx].inJSON = inJSON
 						testCases[idx].hashNames = hashNames
-
-						fileRank := testFilenameRankMap[filepath.Base(input)]
-						if fileRank <= 0 {
-							t.Fatalf("file rank of %q is %d, not positive",
-								input, fileRank)
-						}
-						checksums := testFileChecksums[fileRank-1].Checksums
-						hashNameRankMap := hashNameRankMaps[fileRank-1]
-						if len(hashNames) == 0 {
-							hashNames = []string{"sha-256"}
-						}
-						cs := make([]hashcs.HashChecksum, 0, len(hashNames))
-						hashRankSet := make(map[int]bool, len(hashNames))
-						for i := range hashNames {
-							hashRank := hashNameRankMap[hashNames[i]]
-							if hashRank <= 0 {
-								t.Fatalf("hash rank of %q for file %q is %d, not positive",
-									hashNames[i], input, hashRank)
-							}
-							if hashRankSet[hashRank] {
-								continue
-							}
-							hashRankSet[hashRank] = true
-							var checksum string
-							if upper {
-								checksum = strings.ToUpper(checksums[hashRank-1].Checksum)
-							} else {
-								checksum = strings.ToLower(checksums[hashRank-1].Checksum)
-							}
-							cs = append(cs, hashcs.HashChecksum{
-								HashName: checksums[hashRank-1].HashName,
-								Checksum: checksum,
-							})
-						}
-						sort.Slice(cs, func(i, j int) bool {
-							return hashNameRankMap[strings.ToLower(cs[i].HashName)] <
-								hashNameRankMap[strings.ToLower(cs[j].HashName)]
-						})
-						buf.Reset()
-						if inJSON {
-							err := enc.Encode(cs)
-							if err != nil {
-								t.Fatal("encode JSON -", err)
-							}
-						} else {
-							for i := range cs {
-								// Ignore error as it is always nil for bytes.Buffer.
-								_, _ = fmt.Fprintf(&buf, "%s: %s\n",
-									cs[i].HashName, cs[i].Checksum)
-							}
-						}
-						testCases[idx].want = make([]byte, buf.Len())
-						copy(testCases[idx].want, buf.Bytes())
-
+						testCases[idx].want = getWantForPrintChecksum(
+							t, &b, enc, input, upper, inJSON, hashNames)
 						idx++
 					}
 				}
 			}
 		}
 	}
-
-	for _, tc := range testCases {
-		var outputName string
-		if tc.output != "" {
-			outputName = filepath.Base(tc.output)
-		}
-		outputName = strconv.QuoteToASCII(outputName)
-		hashNamesName := "<nil>"
-		if tc.hashNames != nil {
-			hashNamesName = strconv.QuoteToASCII(strings.Join(tc.hashNames, ","))
-		}
-		t.Run(
-			fmt.Sprintf(
-				"output=%s&input=%+q&upper=%t&inJSON=%t&hashNames=%s",
-				outputName,
-				filepath.Base(tc.input),
-				tc.upper,
-				tc.inJSON,
-				hashNamesName,
-			),
-			func(t *testing.T) {
-				// Capture stdout or stderr as needed.
-				var r io.Reader
-				var c io.Closer
-				if tc.output == "" {
-					pipeR, pipeW, err := os.Pipe()
-					if err != nil {
-						t.Fatal("create pipe -", err)
-					}
-					t.Cleanup(func() {
-						os.Stdout = stdout
-					})
-					r, c, os.Stdout = pipeR, pipeW, pipeW
-				} else if tc.output == "STDERR" {
-					pipeR, pipeW, err := os.Pipe()
-					if err != nil {
-						t.Fatal("create pipe -", err)
-					}
-					t.Cleanup(func() {
-						os.Stderr = stderr
-					})
-					r, c, os.Stderr = pipeR, pipeW, pipeW
-				}
-
-				err := cmd.PrintChecksum(tc.output, tc.input,
-					tc.upper, tc.inJSON, tc.hashNames)
-				// Restore stdout and stderr,
-				// regardless of whether they have been replaced.
-				os.Stdout, os.Stderr = stdout, stderr
-				if err != nil {
-					t.Fatal("PrintChecksum -", err)
-				}
-
-				var got []byte
-				if r != nil {
-					err = c.Close()
-					if err != nil {
-						t.Fatal("close c -", err)
-					}
-					got, err = io.ReadAll(r)
-				} else {
-					got, err = os.ReadFile(tc.output)
-				}
-
-				if err != nil {
-					t.Error("read output -", err)
-				} else if !bytes.Equal(got, tc.want) {
-					t.Errorf("got %s\nwant %s", got, tc.want)
-				}
-			},
-		)
+	if idx != len(testCases) {
+		t.Fatal("excessive test cases, please update")
 	}
+	return testCases
+}
+
+// getWantForPrintChecksum returns the expected print content
+// for TestPrintChecksum.
+//
+// It uses t.Fatal and t.Fatalf to stop the test if something is wrong.
+func getWantForPrintChecksum(
+	t *testing.T,
+	b *strings.Builder,
+	enc *json.Encoder,
+	input string,
+	upper bool,
+	inJSON bool,
+	hashNames []string,
+) string {
+	fileRank := testFilenameRankMap[filepath.Base(input)]
+	if fileRank <= 0 {
+		t.Fatalf("file rank of %q is %d, not positive", input, fileRank)
+	}
+	checksums := testFileChecksums[fileRank-1].Checksums
+	hashNameRankMap := hashNameRankMaps[fileRank-1]
+	if len(hashNames) == 0 {
+		hashNames = []string{"sha-256"}
+	}
+	cs := make([]hashcs.HashChecksum, 0, len(hashNames))
+	hashRankSet := make(map[int]struct{}, len(hashNames))
+	for i := range hashNames {
+		hashRank := hashNameRankMap[hashNames[i]]
+		if hashRank <= 0 {
+			t.Fatalf("hash rank of %q for file %q is %d, not positive",
+				hashNames[i], input, hashRank)
+		}
+		if _, ok := hashRankSet[hashRank]; ok {
+			continue
+		}
+		hashRankSet[hashRank] = struct{}{}
+		var checksum string
+		if upper {
+			checksum = strings.ToUpper(checksums[hashRank-1].Checksum)
+		} else {
+			checksum = strings.ToLower(checksums[hashRank-1].Checksum)
+		}
+		cs = append(cs, hashcs.HashChecksum{
+			HashName: checksums[hashRank-1].HashName,
+			Checksum: checksum,
+		})
+	}
+	slices.SortFunc(cs, func(a, b hashcs.HashChecksum) int {
+		ra := hashNameRankMap[strings.ToLower(a.HashName)]
+		rb := hashNameRankMap[strings.ToLower(b.HashName)]
+		if ra < rb {
+			return -1
+		} else if ra > rb {
+			return 1
+		}
+		return 0
+	})
+
+	b.Reset()
+	if inJSON {
+		err := enc.Encode(cs)
+		if err != nil {
+			t.Fatal("encode JSON -", err)
+		}
+	} else {
+		for i := range cs {
+			b.WriteString(cs[i].HashName)
+			b.WriteString(": ")
+			b.WriteString(cs[i].Checksum)
+			b.WriteByte('\n')
+		}
+	}
+	return b.String()
 }

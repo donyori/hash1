@@ -25,7 +25,7 @@ import (
 	_ "crypto/sha256" // link crypto.224 and crypto.SHA256 to the binary
 	_ "crypto/sha512" // link crypto.384, crypto.512, crypto.SHA512_224, and crypto.SHA512_256 to the binary
 	"hash"
-	"sort"
+	"slices"
 
 	"github.com/donyori/gogo/errors"
 	"github.com/donyori/gogo/filesys/local"
@@ -180,8 +180,14 @@ func CalculateChecksum(filename string, upper bool, hashNames []string) (
 		hs = append(hs, h)
 	}
 	n := len(hs)
-	sort.Slice(hs, func(i, j int) bool {
-		return hashRankMap[hs[i]] < hashRankMap[hs[j]]
+	slices.SortFunc(hs, func(a, b crypto.Hash) int {
+		ra, rb := hashRankMap[a], hashRankMap[b]
+		if ra < rb {
+			return -1
+		} else if ra > rb {
+			return 1
+		}
+		return 0
 	})
 	newHashes := make([]func() hash.Hash, n)
 	for i := 0; i < n; i++ {

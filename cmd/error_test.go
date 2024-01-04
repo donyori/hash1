@@ -32,20 +32,24 @@ func TestAppendFunctionNamesToError(t *testing.T) {
 	var errs [6]error
 	errs[0] = errors.New("test error")
 	func() {
-		// This function name: "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func1".
+		// This function name:
+		// "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func1".
 		errs[1] = errors.AutoWrap(errs[0])
 	}()
 	errs[2] = fmt.Errorf("wrapping %w", errs[1])
 	func() {
-		// This function name: "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func2".
+		// This function name:
+		// "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func2".
 		errs[3] = errors.AutoWrap(errs[2])
 	}()
 	func() {
-		// This function name: "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func3".
+		// This function name:
+		// "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func3".
 		errs[4] = errors.AutoWrap(errs[3])
 	}()
 	func() {
-		// This function name: "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func4".
+		// This function name:
+		// "github.com/donyori/hash1/cmd_test.TestAppendFunctionNamesToError.func4".
 		errs[5] = errors.AutoWrap(errs[4])
 	}()
 
@@ -81,7 +85,8 @@ Error function chain:
 		t.Run(fmt.Sprintf("case %d?err=%s", i, errName), func(t *testing.T) {
 			got := cmd.AppendFunctionNamesToError(tc.err)
 			if got != tc.want {
-				t.Errorf("got (type: %T) %[1]s\nwant (type: %T) %[2]s", got, tc.want)
+				t.Errorf("got (type: %T) %[1]s\nwant (type: %T) %[2]s",
+					got, tc.want)
 			}
 		})
 	}

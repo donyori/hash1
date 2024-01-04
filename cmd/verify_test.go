@@ -65,18 +65,44 @@ func TestVerifyFlagNamesHashChecksumValidAndConsistent(t *testing.T) {
 	}
 }
 
-func TestVerifyChecksum_SHA256_OK(t *testing.T) {
-	sha256FlagIndex := -1
-	for i := 0; i < hashcs.NumHash; i++ {
-		if cmd.VerifyFlagNamesHashChecksum[i][0] == "sha256" {
-			sha256FlagIndex = i
-			break
-		}
-	}
-	if sha256FlagIndex < 0 {
-		t.Fatal(`cannot find index of flag "sha256"`)
-	}
+type verifyChecksumSHA256OKAndFail struct {
+	filename  string
+	flagValue string
+	flagName  string
+}
 
+func TestVerifyChecksum_SHA256_OK(t *testing.T) {
+	sha256FlagIndex := getFlagIndex(t, "sha256")
+	for _, tc := range getTestCasesForVerifyChecksumSHA256OK(t) {
+		t.Run(
+			fmt.Sprintf("filename=%+q&flag=%s", tc.filename, tc.flagName),
+			func(t *testing.T) {
+				var flags [hashcs.NumHash]string
+				flags[sha256FlagIndex] = tc.flagValue
+				mismatch, err, isIllegalUseError := cmd.VerifyChecksum(
+					filepath.Join(TestDataDir, tc.filename), &flags)
+				if err != nil {
+					t.Error("got error", err)
+				}
+				if mismatch != nil {
+					t.Errorf("got mismatch %+v", mismatch)
+				}
+				if isIllegalUseError {
+					t.Errorf("got isIllegalUseError %t; want false",
+						isIllegalUseError)
+				}
+			},
+		)
+	}
+}
+
+// getTestCasesForVerifyChecksumSHA256OK returns test cases
+// for TestVerifyChecksum_SHA256_OK.
+//
+// It uses t.Fatal and t.Fatalf to stop the test if something is wrong.
+func getTestCasesForVerifyChecksumSHA256OK(
+	t *testing.T,
+) []verifyChecksumSHA256OKAndFail {
 	flagNames := []string{
 		"entire",
 		"prefix",
@@ -86,11 +112,8 @@ func TestVerifyChecksum_SHA256_OK(t *testing.T) {
 		`prefix+"..."`,
 		`"..."`,
 	}
-	testCases := make([]struct {
-		filename  string
-		flagValue string
-		flagName  string
-	}, len(testFileChecksums)*len(flagNames))
+	testCases := make([]verifyChecksumSHA256OKAndFail,
+		len(testFileChecksums)*len(flagNames))
 	var idx int
 	for i := range testFileChecksums {
 		sha256Rank := hashNameRankMaps[i]["sha-256"]
@@ -119,46 +142,53 @@ func TestVerifyChecksum_SHA256_OK(t *testing.T) {
 			case 6:
 				testCases[idx].flagValue = "..."
 			default:
-				// This should never happen, but will act as a safeguard for later,
+				// This should never happen,
+				// but will act as a safeguard for later,
 				// as a default value doesn't make sense here.
 				t.Fatal("undefined case", j)
 			}
 			idx++
 		}
 	}
-
-	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("filename=%+q&flag=%s", tc.filename, tc.flagName), func(t *testing.T) {
-			var flags [hashcs.NumHash]string
-			flags[sha256FlagIndex] = tc.flagValue
-			mismatch, err, isIllegalUseError := cmd.VerifyChecksum(
-				filepath.Join(TestDataDir, tc.filename), &flags)
-			if err != nil {
-				t.Error("got error", err)
-			}
-			if mismatch != nil {
-				t.Errorf("got mismatch %+v", mismatch)
-			}
-			if isIllegalUseError {
-				t.Errorf("got isIllegalUseError %t; want false",
-					isIllegalUseError)
-			}
-		})
+	if idx != len(testCases) {
+		t.Fatal("excessive test cases, please update")
 	}
+	return testCases
 }
 
 func TestVerifyChecksum_SHA256_Fail(t *testing.T) {
-	sha256FlagIndex := -1
-	for i := 0; i < hashcs.NumHash; i++ {
-		if cmd.VerifyFlagNamesHashChecksum[i][0] == "sha256" {
-			sha256FlagIndex = i
-			break
-		}
+	sha256FlagIndex := getFlagIndex(t, "sha256")
+	for _, tc := range getTestCasesForVerifyChecksumSHA256Fail(t) {
+		t.Run(
+			fmt.Sprintf("filename=%+q&flag=%s", tc.filename, tc.flagName),
+			func(t *testing.T) {
+				var flags [hashcs.NumHash]string
+				flags[sha256FlagIndex] = tc.flagValue
+				mismatch, err, isIllegalUseError := cmd.VerifyChecksum(
+					filepath.Join(TestDataDir, tc.filename), &flags)
+				if err != nil {
+					t.Error("got error", err)
+				}
+				if len(mismatch) != 1 ||
+					mismatch[0].HashName != crypto.SHA256.String() {
+					t.Errorf("got mismatch %+v", mismatch)
+				}
+				if isIllegalUseError {
+					t.Errorf("got isIllegalUseError %t; want false",
+						isIllegalUseError)
+				}
+			},
+		)
 	}
-	if sha256FlagIndex < 0 {
-		t.Fatal(`cannot find index of flag "sha256"`)
-	}
+}
 
+// getTestCasesForVerifyChecksumSHA256Fail returns test cases
+// for TestVerifyChecksum_SHA256_Fail.
+//
+// It uses t.Fatal and t.Fatalf to stop the test if something is wrong.
+func getTestCasesForVerifyChecksumSHA256Fail(
+	t *testing.T,
+) []verifyChecksumSHA256OKAndFail {
 	flagNames := []string{
 		"entire",
 		"prefix",
@@ -169,11 +199,8 @@ func TestVerifyChecksum_SHA256_Fail(t *testing.T) {
 		`prefix+"..."`,
 	}
 	replaceIndexes := []int{-1, 3, 6, 3, 13, -1, 3}
-	testCases := make([]struct {
-		filename  string
-		flagValue string
-		flagName  string
-	}, len(testFileChecksums)*len(flagNames))
+	testCases := make([]verifyChecksumSHA256OKAndFail,
+		len(testFileChecksums)*len(flagNames))
 	var idx int
 	for i := range testFileChecksums {
 		sha256Rank := hashNameRankMaps[i]["sha-256"]
@@ -200,7 +227,8 @@ func TestVerifyChecksum_SHA256_Fail(t *testing.T) {
 			case 6:
 				testCases[idx].flagValue = checksum[:7] + "..."
 			default:
-				// This should never happen, but will act as a safeguard for later,
+				// This should never happen,
+				// but will act as a safeguard for later,
 				// as a default value doesn't make sense here.
 				t.Fatal("undefined case", j)
 			}
@@ -213,40 +241,14 @@ func TestVerifyChecksum_SHA256_Fail(t *testing.T) {
 			idx++
 		}
 	}
-
-	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("filename=%+q&flag=%s", tc.filename, tc.flagName), func(t *testing.T) {
-			var flags [hashcs.NumHash]string
-			flags[sha256FlagIndex] = tc.flagValue
-			mismatch, err, isIllegalUseError := cmd.VerifyChecksum(
-				filepath.Join(TestDataDir, tc.filename), &flags)
-			if err != nil {
-				t.Error("got error", err)
-			}
-			if len(mismatch) != 1 ||
-				mismatch[0].HashName != crypto.SHA256.String() {
-				t.Errorf("got mismatch %+v", mismatch)
-			}
-			if isIllegalUseError {
-				t.Errorf("got isIllegalUseError %t; want false",
-					isIllegalUseError)
-			}
-		})
+	if idx != len(testCases) {
+		t.Fatal("excessive test cases, please update")
 	}
+	return testCases
 }
 
 func TestVerifyChecksum_SHA256_InvalidHex(t *testing.T) {
-	sha256FlagIndex := -1
-	for i := 0; i < hashcs.NumHash; i++ {
-		if cmd.VerifyFlagNamesHashChecksum[i][0] == "sha256" {
-			sha256FlagIndex = i
-			break
-		}
-	}
-	if sha256FlagIndex < 0 {
-		t.Fatal(`cannot find index of flag "sha256"`)
-	}
-
+	sha256FlagIndex := getFlagIndex(t, "sha256")
 	isInvalidPrefixList := []bool{true, true, true, false, false, false, true}
 	flagsList := make([][hashcs.NumHash]string, len(isInvalidPrefixList))
 	flagsList[0][sha256FlagIndex] = "3x12"
@@ -269,6 +271,9 @@ func TestVerifyChecksum_SHA256_InvalidHex(t *testing.T) {
 			testCases[idx].isInvalidPrefix = isInvalidPrefixList[j]
 			idx++
 		}
+	}
+	if idx != len(testCases) {
+		t.Fatal("excessive test cases, please update")
 	}
 
 	const WantErrorSuffix = " is not a valid hexadecimal representation"
@@ -306,7 +311,41 @@ func TestVerifyChecksum_SHA256_InvalidHex(t *testing.T) {
 	}
 }
 
+type verifyChecksumAllHashesOKAndFail struct {
+	filename  string
+	flags     [hashcs.NumHash]string
+	flagsName string
+}
+
 func TestVerifyChecksum_AllHashes_OK(t *testing.T) {
+	for _, tc := range getTestCasesForVerifyChecksumAllHashesOK(t) {
+		t.Run(
+			fmt.Sprintf("filename=%+q&flags=%s", tc.filename, tc.flagsName),
+			func(t *testing.T) {
+				mismatch, err, isIllegalUseError := cmd.VerifyChecksum(
+					filepath.Join(TestDataDir, tc.filename), &tc.flags)
+				if err != nil {
+					t.Error("got error", err)
+				}
+				if mismatch != nil {
+					t.Errorf("got mismatch %+v", mismatch)
+				}
+				if isIllegalUseError {
+					t.Errorf("got isIllegalUseError %t; want false",
+						isIllegalUseError)
+				}
+			},
+		)
+	}
+}
+
+// getTestCasesForVerifyChecksumAllHashesOK returns test cases
+// for TestVerifyChecksum_AllHashes_OK.
+//
+// It uses t.Fatal and t.Fatalf to stop the test if something is wrong.
+func getTestCasesForVerifyChecksumAllHashesOK(
+	t *testing.T,
+) []verifyChecksumAllHashesOKAndFail {
 	flagsNames := []string{
 		"entire",
 		"prefix",
@@ -316,11 +355,8 @@ func TestVerifyChecksum_AllHashes_OK(t *testing.T) {
 		`prefix+"..."`,
 		`"..."`,
 	}
-	testCases := make([]struct {
-		filename  string
-		flags     [hashcs.NumHash]string
-		flagsName string
-	}, len(testFileChecksums)*len(flagsNames))
+	testCases := make([]verifyChecksumAllHashesOKAndFail,
+		len(testFileChecksums)*len(flagsNames))
 	var idx int
 	for i := range testFileChecksums {
 		var checksums [hashcs.NumHash]string
@@ -355,7 +391,8 @@ func TestVerifyChecksum_AllHashes_OK(t *testing.T) {
 				case 6:
 					testCases[idx].flags[k] = "..."
 				default:
-					// This should never happen, but will act as a safeguard for later,
+					// This should never happen,
+					// but will act as a safeguard for later,
 					// as a default value doesn't make sense here.
 					t.Fatal("undefined case", j)
 				}
@@ -363,113 +400,14 @@ func TestVerifyChecksum_AllHashes_OK(t *testing.T) {
 			idx++
 		}
 	}
-
-	for _, tc := range testCases {
-		t.Run(
-			fmt.Sprintf("filename=%+q&flags=%s", tc.filename, tc.flagsName),
-			func(t *testing.T) {
-				mismatch, err, isIllegalUseError := cmd.VerifyChecksum(
-					filepath.Join(TestDataDir, tc.filename), &tc.flags)
-				if err != nil {
-					t.Error("got error", err)
-				}
-				if mismatch != nil {
-					t.Errorf("got mismatch %+v", mismatch)
-				}
-				if isIllegalUseError {
-					t.Errorf("got isIllegalUseError %t; want false",
-						isIllegalUseError)
-				}
-			},
-		)
+	if idx != len(testCases) {
+		t.Fatal("excessive test cases, please update")
 	}
+	return testCases
 }
 
 func TestVerifyChecksum_AllHashes_MD5AndSHA256Fail(t *testing.T) {
-	md5FlagIndex, sha256FlagIndex := -1, -1
-	for i := 0; i < hashcs.NumHash; i++ {
-		switch cmd.VerifyFlagNamesHashChecksum[i][0] {
-		case "md5":
-			md5FlagIndex = i
-		case "sha256":
-			sha256FlagIndex = i
-		default:
-			continue
-		}
-		if md5FlagIndex >= 0 && sha256FlagIndex >= 0 {
-			break
-		}
-	}
-	if md5FlagIndex < 0 {
-		t.Fatal(`cannot find index of flag "md5"`)
-	} else if sha256FlagIndex < 0 {
-		t.Fatal(`cannot find index of flag "sha256"`)
-	}
-
-	flagsNames := []string{
-		"entire",
-		"prefix",
-		"suffix",
-		"prefix(wrong)+suffix",
-		"prefix+suffix(wrong)",
-		`entire+"..."`,
-		`prefix+"..."`,
-	}
-	replaceIndexes := []int{-1, 3, 6, 3, 13, -1, 3}
-	testCases := make([]struct {
-		filename  string
-		flags     [hashcs.NumHash]string
-		flagsName string
-	}, len(testFileChecksums)*len(flagsNames))
-	var idx int
-	for i := range testFileChecksums {
-		var checksums [hashcs.NumHash]string
-		for _, cs := range testFileChecksums[i].Checksums {
-			checksums[hashNameRankMaps[i][strings.ToLower(cs.HashName)]-1] = cs.Checksum
-		}
-		for j := range checksums {
-			if checksums[j] == "" {
-				t.Fatalf("checksums[%d] of file %q is empty",
-					j, testFileChecksums[i].Filename)
-			}
-		}
-		for j := range flagsNames {
-			testCases[idx].filename = testFileChecksums[i].Filename
-			testCases[idx].flagsName = flagsNames[j]
-			for k := 0; k < hashcs.NumHash; k++ {
-				switch j {
-				case 0:
-					testCases[idx].flags[k] = checksums[k]
-				case 1:
-					testCases[idx].flags[k] = checksums[k][:7]
-				case 2:
-					testCases[idx].flags[k] = "..." +
-						checksums[k][len(checksums[k])-7:]
-				case 3, 4:
-					testCases[idx].flags[k] = checksums[k][:7] +
-						"..." + checksums[k][len(checksums[k])-7:]
-				case 5:
-					testCases[idx].flags[k] = checksums[k] + "..."
-				case 6:
-					testCases[idx].flags[k] = checksums[k][:7] + "..."
-				default:
-					// This should never happen, but will act as a safeguard for later,
-					// as a default value doesn't make sense here.
-					t.Fatal("undefined case", j)
-				}
-				if k == md5FlagIndex || k == sha256FlagIndex {
-					replIdx := replaceIndexes[j]
-					if replIdx < 0 {
-						replIdx = len(checksums[k]) / 2
-					}
-					testCases[idx].flags[k] = makeWrongChecksum(
-						testCases[idx].flags[k], replIdx)
-				}
-			}
-			idx++
-		}
-	}
-
+	testCases := getTestCasesForVerifyChecksumAllHashesMD5AndSHA256Fail(t)
 	for _, tc := range testCases {
 		t.Run(
 			fmt.Sprintf("filename=%+q&flags=%s", tc.filename, tc.flagsName),
@@ -493,18 +431,106 @@ func TestVerifyChecksum_AllHashes_MD5AndSHA256Fail(t *testing.T) {
 	}
 }
 
-func TestVerifyChecksum_AllHashes_SHA256InvalidHex(t *testing.T) {
-	sha256FlagIndex := -1
-	for i := 0; i < hashcs.NumHash; i++ {
-		if cmd.VerifyFlagNamesHashChecksum[i][0] == "sha256" {
-			sha256FlagIndex = i
-			break
+// getTestCasesForVerifyChecksumAllHashesMD5AndSHA256Fail returns test cases
+// for TestVerifyChecksum_AllHashes_MD5AndSHA256Fail.
+//
+// It uses t.Fatal and t.Fatalf to stop the test if something is wrong.
+func getTestCasesForVerifyChecksumAllHashesMD5AndSHA256Fail(
+	t *testing.T,
+) []verifyChecksumAllHashesOKAndFail {
+	md5FlagIndex := getFlagIndex(t, "md5")
+	sha256FlagIndex := getFlagIndex(t, "sha256")
+	flagsNames := []string{
+		"entire",
+		"prefix",
+		"suffix",
+		"prefix(wrong)+suffix",
+		"prefix+suffix(wrong)",
+		`entire+"..."`,
+		`prefix+"..."`,
+	}
+	replaceIndexes := []int{-1, 3, 6, 3, 13, -1, 3}
+	testCases := make([]verifyChecksumAllHashesOKAndFail,
+		len(testFileChecksums)*len(flagsNames))
+	var idx int
+	for i := range testFileChecksums {
+		var checksums [hashcs.NumHash]string
+		for _, cs := range testFileChecksums[i].Checksums {
+			checksums[hashNameRankMaps[i][strings.ToLower(cs.HashName)]-1] = cs.Checksum
+		}
+		for j := range checksums {
+			if checksums[j] == "" {
+				t.Fatalf("checksums[%d] of file %q is empty",
+					j, testFileChecksums[i].Filename)
+			}
+		}
+		for j := range flagsNames {
+			testCases[idx].filename = testFileChecksums[i].Filename
+			testCases[idx].flagsName = flagsNames[j]
+			for k := 0; k < hashcs.NumHash; k++ {
+				testCases[idx].flags[k] = getFlagForVerifyChecksumAllHashesMD5AndSHA256Fail(
+					t,
+					j,
+					checksums[k],
+					k,
+					md5FlagIndex,
+					sha256FlagIndex,
+					replaceIndexes,
+				)
+			}
+			idx++
 		}
 	}
-	if sha256FlagIndex < 0 {
-		t.Fatal(`cannot find index of flag "sha256"`)
+	if idx != len(testCases) {
+		t.Fatal("excessive test cases, please update")
 	}
+	return testCases
+}
 
+// getFlagForVerifyChecksumAllHashesMD5AndSHA256Fail returns the flag value
+// for TestVerifyChecksum_AllHashes_MD5AndSHA256Fail.
+//
+// It uses t.Fatal to stop the test if the case index is out of range [0, 6].
+func getFlagForVerifyChecksumAllHashesMD5AndSHA256Fail(
+	t *testing.T,
+	caseIndex int,
+	checksum string,
+	flagIndex int,
+	md5FlagIndex int,
+	sha256FlagIndex int,
+	replaceIndexes []int,
+) string {
+	var flag string
+	switch caseIndex {
+	case 0:
+		flag = checksum
+	case 1:
+		flag = checksum[:7]
+	case 2:
+		flag = "..." + checksum[len(checksum)-7:]
+	case 3, 4:
+		flag = checksum[:7] + "..." + checksum[len(checksum)-7:]
+	case 5:
+		flag = checksum + "..."
+	case 6:
+		flag = checksum[:7] + "..."
+	default:
+		// This should never happen, but will act as a safeguard for later,
+		// as a default value doesn't make sense here.
+		t.Fatal("undefined case", caseIndex)
+	}
+	if flagIndex == md5FlagIndex || flagIndex == sha256FlagIndex {
+		replIdx := replaceIndexes[caseIndex]
+		if replIdx < 0 {
+			replIdx = len(checksum) / 2
+		}
+		flag = makeWrongChecksum(flag, replIdx)
+	}
+	return flag
+}
+
+func TestVerifyChecksum_AllHashes_SHA256InvalidHex(t *testing.T) {
+	sha256FlagIndex := getFlagIndex(t, "sha256")
 	isInvalidPrefixList := []bool{true, true, true, false, false, false, true}
 	flagsList := make([][hashcs.NumHash]string, len(isInvalidPrefixList))
 	flagsList[0][sha256FlagIndex] = "3x12"
@@ -538,6 +564,9 @@ func TestVerifyChecksum_AllHashes_SHA256InvalidHex(t *testing.T) {
 			testCases[idx].isInvalidPrefix = isInvalidPrefixList[j]
 			idx++
 		}
+	}
+	if idx != len(testCases) {
+		t.Fatal("excessive test cases, please update")
 	}
 
 	const WantErrorSuffix = " is not a valid hexadecimal representation"
@@ -596,6 +625,20 @@ func TestVerifyChecksum_NoHash(t *testing.T) {
 			}
 		})
 	}
+}
+
+// getFlagIndex returns the index of the specified flag
+// in cmd.VerifyFlagNamesHashChecksum.
+//
+// It uses t.Fatalf to stop the test if it cannot find the specified flag.
+func getFlagIndex(t *testing.T, flagName string) int {
+	for i := 0; i < hashcs.NumHash; i++ {
+		if cmd.VerifyFlagNamesHashChecksum[i][0] == flagName {
+			return i
+		}
+	}
+	t.Fatalf("cannot find index of flag %q", flagName)
+	return -1
 }
 
 // makeWrongChecksum replaces s[i] with another character in {'0', '1'}.

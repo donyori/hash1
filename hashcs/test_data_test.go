@@ -69,7 +69,8 @@ func LazyLoadTestFilenameHashChecksumMap() map[string]map[crypto.Hash]string {
 			defer func() {
 				if err != nil {
 					testFilenameHashChecksumMap = nil
-					lazyLoadTestFilenameHashChecksumMapOnceAtom.Store(new(sync.Once))
+					lazyLoadTestFilenameHashChecksumMapOnceAtom.Store(
+						new(sync.Once))
 				}
 			}()
 			defer func() {

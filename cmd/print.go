@@ -134,7 +134,13 @@ By default, the standard output stream is used.`)
 // upper indicates whether to output the result in uppercase.
 //
 // inJSON indicates whether to output the result in JSON format.
-func printChecksum(output, input string, upper, inJSON bool, hashNames []string) (err error) {
+func printChecksum(
+	output string,
+	input string,
+	upper bool,
+	inJSON bool,
+	hashNames []string,
+) (err error) {
 	checksums, err := hashcs.CalculateChecksum(input, upper, hashNames)
 	if err != nil {
 		return errors.AutoWrap(err)

@@ -31,7 +31,7 @@ var rootCmd = &cobra.Command{
 	Long: `hash1 calculates the hash checksum of one local file
 and then prints it (hash1 print) or compares it with
 the expected value (hash1 verify).`,
-	Version: "0.1.1",
+	Version: "0.1.2",
 }
 
 // Execute adds all child commands to the root command
