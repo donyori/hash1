@@ -1,5 +1,5 @@
 // hash1.  A tool to calculate the hash checksum of one local file.
-// Copyright (C) 2023  Yuan Gao
+// Copyright (C) 2023-2024  Yuan Gao
 //
 // This file is part of hash1.
 //
