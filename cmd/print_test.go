@@ -135,7 +135,7 @@ func getTestCasesForPrintChecksum(t *testing.T) []printChecksumTestCase {
 	}
 
 	allHashNames := make([]string, hashcs.NumHash)
-	for i := 0; i < hashcs.NumHash; i++ {
+	for i := range hashcs.NumHash {
 		allHashNames[i] = hashcs.Names[i][0]
 	}
 	hashNamesList := [][]string{

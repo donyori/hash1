@@ -37,7 +37,7 @@ func TestVerifyFlagNamesHashChecksumValidAndConsistent(t *testing.T) {
 	if err != nil {
 		t.Fatal("compile regexp -", err)
 	}
-	for i := 0; i < hashcs.NumHash; i++ {
+	for i := range hashcs.NumHash {
 		name := cmd.VerifyFlagNamesHashChecksum[i][0]
 		shorthand := cmd.VerifyFlagNamesHashChecksum[i][1]
 		if len(shorthand) > 1 {
@@ -372,7 +372,7 @@ func getTestCasesForVerifyChecksumAllHashesOK(
 		for j := range flagsNames {
 			testCases[idx].filename = testFileChecksums[i].Filename
 			testCases[idx].flagsName = flagsNames[j]
-			for k := 0; k < hashcs.NumHash; k++ {
+			for k := range hashcs.NumHash {
 				switch j {
 				case 0:
 					testCases[idx].flags[k] = checksums[k]
@@ -467,7 +467,7 @@ func getTestCasesForVerifyChecksumAllHashesMD5AndSHA256Fail(
 		for j := range flagsNames {
 			testCases[idx].filename = testFileChecksums[i].Filename
 			testCases[idx].flagsName = flagsNames[j]
-			for k := 0; k < hashcs.NumHash; k++ {
+			for k := range hashcs.NumHash {
 				testCases[idx].flags[k] = getFlagForVerifyChecksumAllHashesMD5AndSHA256Fail(
 					t,
 					j,
@@ -632,7 +632,7 @@ func TestVerifyChecksum_NoHash(t *testing.T) {
 //
 // It uses t.Fatalf to stop the test if it cannot find the specified flag.
 func getFlagIndex(t *testing.T, flagName string) int {
-	for i := 0; i < hashcs.NumHash; i++ {
+	for i := range hashcs.NumHash {
 		if cmd.VerifyFlagNamesHashChecksum[i][0] == flagName {
 			return i
 		}

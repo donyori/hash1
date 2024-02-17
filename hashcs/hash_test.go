@@ -22,7 +22,7 @@ import (
 	"crypto"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -66,7 +66,7 @@ func TestNamesAndHashesConsistent(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	for i := 0; i < hashcs.NumHash; i++ {
+	for i := range hashcs.NumHash {
 		if hashcs.Names[i][0] != strings.ToLower(hashcs.Hashes[i].String()) {
 			t.Errorf("hashcs.Names[%d][0] is %s; hashcs.Hashes[%[1]d] is %[3]v; mismatch",
 				i, hashcs.Names[i][0], hashcs.Hashes[i])
@@ -91,7 +91,9 @@ func TestCalculateChecksum(t *testing.T) {
 			hashNames = append(hashNames, name, name) // duplicate each name
 		}
 	}
-	rand.New(rand.NewSource(10)).Shuffle(len(hashNames), func(i, j int) {
+	rand.New(rand.NewChaCha8(
+		[32]byte([]byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")),
+	)).Shuffle(len(hashNames), func(i, j int) {
 		hashNames[i], hashNames[j] = hashNames[j], hashNames[i]
 	})
 	for entryName, m := range LazyLoadTestFilenameHashChecksumMap() {
@@ -99,7 +101,7 @@ func TestCalculateChecksum(t *testing.T) {
 			filename := filepath.Join(TestDataDir, entryName)
 			for _, upper := range []bool{false, true} {
 				want := make([]hashcs.HashChecksum, hashcs.NumHash)
-				for i := 0; i < hashcs.NumHash; i++ {
+				for i := range hashcs.NumHash {
 					s := m[hashcs.Hashes[i]]
 					if upper {
 						s = strings.ToUpper(s)

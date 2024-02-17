@@ -151,7 +151,7 @@ func init() {
 including result and program error, excluding messages for
 help and illegal use of this command`)
 
-	for i := 0; i < hashcs.NumHash; i++ {
+	for i := range hashcs.NumHash {
 		verifyCmd.Flags().StringVarP(
 			&verifyFlagsHashChecksum[i],
 			verifyFlagNamesHashChecksum[i][0],
@@ -192,7 +192,7 @@ func verifyChecksum(filename string, flags *[hashcs.NumHash]string) (
 		return nil, errors.AutoNew("hash checksum not specified"), true
 	}
 	hashNames := make([]string, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		hashNames[i] = strings.ToLower(expected[i].hashName)
 	}
 	checksums, err := hashcs.CalculateChecksum(filename, false, hashNames)
@@ -204,7 +204,7 @@ func verifyChecksum(filename string, flags *[hashcs.NumHash]string) (
 			len(checksums), n,
 		)), false
 	}
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if expected[i].hashName != checksums[i].HashName {
 			return nil, errors.AutoWrap(fmt.Errorf(
 				"the hash name of No.%d hash checksum is %q; want %q",
@@ -234,7 +234,7 @@ func parseHashChecksumFlags(flags *[hashcs.NumHash]string) (
 	if flags == nil {
 		panic(errors.AutoMsg("flag array pointer is nil"))
 	}
-	for i := 0; i < hashcs.NumHash; i++ {
+	for i := range hashcs.NumHash {
 		if flags[i] == "" {
 			continue
 		}

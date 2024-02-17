@@ -190,7 +190,7 @@ func CalculateChecksum(filename string, upper bool, hashNames []string) (
 		return 0
 	})
 	newHashes := make([]func() hash.Hash, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		newHashes[i] = hs[i].New
 	}
 	cs, err := local.Checksum(filename, upper, newHashes...)
@@ -198,7 +198,7 @@ func CalculateChecksum(filename string, upper bool, hashNames []string) (
 		return nil, errors.AutoWrap(err)
 	} else if len(cs) > 0 {
 		checksums = make([]HashChecksum, n)
-		for i := 0; i < n; i++ {
+		for i := range n {
 			checksums[i].HashName = hs[i].String()
 			checksums[i].Checksum = cs[i]
 		}

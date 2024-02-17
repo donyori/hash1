@@ -70,7 +70,7 @@ To use uppercase, the user can set the flag "upper" ("u" for short).`,
 		switch {
 		case printFlagAll:
 			hashNames = make([]string, hashcs.NumHash)
-			for i := 0; i < hashcs.NumHash; i++ {
+			for i := range hashcs.NumHash {
 				hashNames[i] = hashcs.Names[i][0]
 			}
 		case printFlagMD5:
